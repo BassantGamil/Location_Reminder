@@ -1,6 +1,7 @@
 package com.udacity.project4.locationreminders.savereminder
 
 import android.app.Application
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.maps.model.PointOfInterest
@@ -14,12 +15,20 @@ import kotlinx.coroutines.launch
 
 class SaveReminderViewModel(val app: Application, val dataSource: ReminderDataSource) :
     BaseViewModel(app) {
+
+    private val _navigateToReminderList = MutableLiveData<Boolean>()
+    val navigateToReminderList: LiveData<Boolean>
+        get() = _navigateToReminderList
     val reminderTitle = MutableLiveData<String>()
     val reminderDescription = MutableLiveData<String>()
     val reminderSelectedLocationStr = MutableLiveData<String>()
     val selectedPOI = MutableLiveData<PointOfInterest>()
     val latitude = MutableLiveData<Double>()
     val longitude = MutableLiveData<Double>()
+
+    init {
+        _navigateToReminderList.value = false
+    }
 
     /**
      * Clear the live data objects to start fresh next time the view model gets called
@@ -33,14 +42,20 @@ class SaveReminderViewModel(val app: Application, val dataSource: ReminderDataSo
         longitude.value = null
     }
 
+    fun navigateToReminderList() {
+        _navigateToReminderList.value = false
+    }
+
     /**
      * Validate the entered data then saves the reminder data to the DataSource
      */
     fun validateAndSaveReminder(reminderData: ReminderDataItem) {
         if (validateEnteredData(reminderData)) {
             saveReminder(reminderData)
+            _navigateToReminderList.value = true
         }
     }
+
 
     /**
      * Save the reminder to the data source
